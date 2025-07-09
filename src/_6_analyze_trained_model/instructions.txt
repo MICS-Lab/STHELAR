@@ -1,0 +1,97 @@
+##########################################
+############## Instructions ##############
+##########################################
+
+# -----------------------------------------
+# Run get_file_launch_inference for ds_1 and ds_4
+
+# ds_1 => use slide_specific_ds_1 for output_dir
+for slide_id in breast_s0 breast_s1 breast_s3 breast_s6 lung_s1 lung_s3 skin_s1 skin_s2 skin_s3 skin_s4 pancreatic_s0 pancreatic_s1 pancreatic_s2 heart_s0 colon_s1 colon_s2 kidney_s0 kidney_s1 liver_s0 liver_s1 tonsil_s0 tonsil_s1 lymph_node_s0 ovary_s0 ovary_s1 prostate_s0 cervix_s0; do python3 src/_6_analyze_trained_model/_1_get_file_launch_inference.py --slide_id "$slide_id" --dataset_id "$slide_id"; done
+
+# ds_4 => use slide_specific_ds_4 for output_dir
+for slide_id in breast_s0 breast_s1 breast_s3 breast_s6 lung_s1 lung_s3 skin_s1 skin_s2 skin_s3 skin_s4 pancreatic_s0 pancreatic_s1 pancreatic_s2 heart_s0 colon_s1 colon_s2 kidney_s0 kidney_s1 liver_s0 liver_s1 tonsil_s0 tonsil_s1 lymph_node_s0 ovary_s0 ovary_s1 prostate_s0 cervix_s0; do python3 src/_6_analyze_trained_model/_1_get_file_launch_inference.py --slide_id "$slide_id" --dataset_id "$slide_id" --grouping '{"Immune": ["T_NK", "B_Plasma", "Myeloid"], "Stromal": ["Blood_vessel", "Fibroblast_Myofibroblast"], "Other": ["Specialized", "Dead"]}'; done
+
+
+# -----------------------------------------
+# Then send data to jeanzay :
+
+rsync --partial --progress -r /Volumes/DD1_FGS/MICS/data_HE2CellType/HE2CT/training_datasets/slide_specific_ds_1 jeanzay:/lustre/fswork/projects/rech/user/ubu16ws/HE2CellType/HE2CT/training_datasets/
+
+rsync --partial --progress -r /Volumes/DD1_FGS/MICS/data_HE2CellType/HE2CT/training_datasets/slide_specific_ds_4 jeanzay:/lustre/fswork/projects/rech/user/ubu16ws/HE2CellType/HE2CT/training_datasets/
+
+rsync --partial --progress -r /Users/felicie-giraud-sauveur/Documents/HE2CellType/code/CT_DS/src/_6_analyze_trained_model/_2_symbolic_links.sh jeanzay:/linkhome/rech/genrce01/ubu16ws/HE2CellType/CT_DS/
+
+rsync --partial --progress -r /Users/felicie-giraud-sauveur/Documents/HE2CellType/code/CT_DS/src/_6_analyze_trained_model/_3_slurm_inference_training_27.sh jeanzay:/linkhome/rech/genrce01/ubu16ws/HE2CellType/CT_DS/
+
+rsync --partial --progress -r /Users/felicie-giraud-sauveur/Documents/HE2CellType/code/CT_DS/src/_6_analyze_trained_model/_3_slurm_inference_training_28.sh jeanzay:/linkhome/rech/genrce01/ubu16ws/HE2CellType/CT_DS/
+
+
+# -----------------------------------------
+# Then run _2_symbolic_links.sh to set up folders for inference with the right data and information
+
+./_2_symbolic_links.sh jeanzay
+
+# For ds_1 :
+# Variables
+cell_cat_id="ct_1"   # TO CHOOSE
+training_dataset_id="ds_1"   # TO CHOOSE
+training_id="training_27"    # TO CHOOSE
+training_timestamp="2025-03-25T100556_training_27"  # TO CHOOSE
+checkpoint_name="checkpoint_40.pth"  # TO CHOOSE
+
+# For ds_4 :
+# Variables
+cell_cat_id="ct_1"   # TO CHOOSE
+training_dataset_id="ds_4"   # TO CHOOSE
+training_id="training_28"    # TO CHOOSE
+training_timestamp="2025-03-26T130326_training_28"  # TO CHOOSE
+checkpoint_name="checkpoint_32.pth"  # TO CHOOSE
+
+
+# -----------------------------------------
+# Apply CellVit inference (file inference_cellvit_experiment_pannuke.py):
+    
+- Update code jeanzay by de-commenting the part to get the **predictions for instance_map** and **pixel count predictions** in inference_cellvit_experiment_pannuke.py (cf. See where there is CHOOSE OR NOT)
+WARINING: Slide too big (breast_s1) and thus do in two parts (cf. See where is CHOOSE only for inference in several times in pannuke.py in datasets folder)
+- Run _3_slurm_inference_training_27 and _3_slurm_inference_training_28 (where using --cell_tokens)
+
+# To update slurm script
+rsync --partial --progress -r /Users/felicie-giraud-sauveur/Documents/HE2CellType/code/CT_DS/src/_6_analyze_trained_model/_3_slurm_inference_training_28.sh jeanzay:/lustre/fshomisc/home/rech/genrce01/ubu16ws/HE2CellType/CT_DS/
+
+# To transfert from WORK to STORE:
+rsync -avh --progress $WORK/HE2CellType/HE2CT/inferences/training_27/heart_s0 $STORE/HE2CellType/HE2CT/inferences/training_27/
+
+# -----------------------------------------
+# Get model output for training_27 and training_28
+
+# Only transfer missing or updated files:
+./src/_6_analyze_trained_model/_4_get_output.sh training_27
+# Force rsync to overwrite everything:
+./src/_6_analyze_trained_model/_4_get_output.sh training_27 overwrite
+
+
+# -----------------------------------------
+# Get segmentation analysis
+
+# Run analyze_segmentation.ipynb for t27 and t28
+
+
+# -----------------------------------------
+# Get labels analysis
+
+# 1. Run extract_pred_labels.py for training_27 and training_28
+training_27 / ds_1 / slide_id
+training_28 / ds_4 / slide_id
+
+Example:
+for slide_id in breast_s0 breast_s1 breast_s3 breast_s6 lung_s1 lung_s3 skin_s1 skin_s2 skin_s3 skin_s4 pancreatic_s0 pancreatic_s1 pancreatic_s2 heart_s0 colon_s1 colon_s2 kidney_s0 kidney_s1 liver_s0 liver_s1 tonsil_s0 tonsil_s1 lymph_node_s0 ovary_s0 ovary_s1 prostate_s0 cervix_s0; do python3 src/_6_analyze_trained_model/labels/extract_pred_labels.py --slide_id "$slide_id"; done
+
+# 2. Run get_final_dataframe.py
+
+# 3. Run analyze_pred_labels.ipynb
+
+
+# -----------------------------------------
+# Get HE features analysis
+
+# Run for each slide for each model the HEfeatures analysis
