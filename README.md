@@ -6,6 +6,10 @@
   <strong>STHELAR, a multi-tissue dataset linking spatial transcriptomics and histology for cell type annotation</strong>
 </p>
 
+<p align="center">
+<a href="https://doi.org/10.5281/zenodo.15849372"><img src="https://zenodo.org/badge/1015300470.svg" alt="DOI"></a>
+</p>
+
 Understanding the composition of the tumor microenvironment is critical for cancer research. Spatial transcriptomics profile gene expressions in spatial context, revealing tissue architecture and cellular heterogeneity, but its cost and technical complexity limit adoption. To address this issue, we introduce a pipeline to build STHELAR, a large-scale dataset that integrates spatial transcriptomics with Hematoxylin and Eosin (H&E) whole slide images for cell type annotation. The dataset comprises 31 human Xenium FFPE sections across 16 tissue types, for 22 cancerous and 9 non-cancerous patients. It contains over 11 million cells, each assigned to one of ten curated cell-type categories designed to accommodate a pan-cancer setting. Annotations were derived through Tangram-based alignment to single-cell reference atlases, followed by slide-specific clustering and differential expression analysis. Co-registered H&E images enabled extraction of over 500,000 patches with segmentation and classification masks. Quality control steps assessed segmentation accuracy, filtered out low-confidence regions, and verified annotation integrity. STHELAR provides a reference resource for developing models to predict cell-type annotations directly from histological images. A detailed description of the pipeline, methods, and results can be found in the following article: [link to article later].
 
 - Data is coming from the 10x Genomics platform using the Xenium technology and only FFPE human samples. A table listing all the data can be found in `list_data.numbers` in the data folder.
