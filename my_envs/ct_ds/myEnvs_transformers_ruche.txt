@@ -1,0 +1,19 @@
+To install env transformers_fgs on ruche :
+
+srun --nodes=1 --time=01:00:00 --gres=gpu:1 --mem=10G -p gpu --pty /bin/bash
+
+module load anaconda3/2022.10/gcc-11.2.0
+module load cuda/11.8.0/gcc-11.2.0
+
+conda create --name transformers_fgs
+
+source activate transformers_fgs
+
+export TMPDIR='temp_dir' # only if error when using pip3 install
+
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+pip install transformers
+
+etc...
+
